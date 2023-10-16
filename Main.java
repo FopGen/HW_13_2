@@ -15,11 +15,39 @@ public class Main {
     public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
         String uriPosts = "https://jsonplaceholder.typicode.com/users/1/posts";
         String uriComments = "https://jsonplaceholder.typicode.com/posts";
+        String uriUnclosedTask = "https://jsonplaceholder.typicode.com/users/";
         List<Post> posts = new ArrayList<>();
 
         int id = getIdFinalPost(uriPosts, posts);
         getListComments(uriComments, id);
 
+       // int id_ishka = 3;
+        printUnclosedTask(uriUnclosedTask, id);
+
+    }
+
+    private static void printUnclosedTask(String uriUnclosedTask, int id) throws URISyntaxException, IOException, InterruptedException {
+        HttpRequest httpRequestGet = HttpRequest.newBuilder(new URI(uriUnclosedTask+id+"/todos"))
+                .header("Content-Type", "application/json")
+                .GET()
+                .version(HttpClient.Version.HTTP_1_1)
+                .build();
+
+        HttpClient httpClientGet = HttpClient.newHttpClient();
+        HttpResponse responceGet = httpClientGet.send(httpRequestGet, HttpResponse.BodyHandlers.ofString());
+
+        String bodyResponce = (String) responceGet.body();
+        ObjectMapper mapper = new ObjectMapper();
+        List<Task> taskLoaded= new ArrayList<>();
+        taskLoaded = Arrays.asList(mapper.readValue(bodyResponce, Task[].class));
+
+        System.out.println("Unclosed task for user id#" + id);
+
+        for (Task task:taskLoaded){
+           if(task.getCompleted()=="false"){
+                System.out.println(task);
+            }
+        }
     }
 
     private static void getListComments(String uriComments, int id) throws URISyntaxException, IOException, InterruptedException {
